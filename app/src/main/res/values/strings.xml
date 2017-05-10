@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Navsys Client</string>
+    <string name="location_permission_rationale">Location access needed to get your indoor position</string>
+    <string name="settings">Settings</string>
 </resources>
