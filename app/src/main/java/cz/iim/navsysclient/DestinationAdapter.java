@@ -1,6 +1,7 @@
 package cz.iim.navsysclient;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import entities.Destination;
  */
 
 public class DestinationAdapter extends ArrayAdapter<Destination> {
+    private static final String TAG = DestinationAdapter.class.getSimpleName();
 
     private List<Destination> destinationList;
     private Context context;
@@ -64,11 +66,15 @@ public class DestinationAdapter extends ArrayAdapter<Destination> {
         Destination destination = destinationList.get(position);
         holder.destinationNameView.setText(destination.getName());
         //holder.distView.setText("" + p.getDistance());
-
+        Log.d(TAG, destination.getName());
         return view;
     }
 
-	/* *********************************
+    public void setDestinationList(List<Destination> destinationList) {
+        this.destinationList = destinationList;
+    }
+
+    /* *********************************
 	 * We use the holder pattern
 	 * It makes the view faster and avoid finding the component
 	 * **********************************/

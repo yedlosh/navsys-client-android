@@ -18,10 +18,12 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import api.NavsysAPI;
+import api.NavsysAPIImpl;
 import api.ResponseParser;
 import entities.Destination;
 
@@ -31,10 +33,10 @@ import static cz.iim.navsysclient.Utils.requestRuntimePermissions;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private NavsysAPI client;
+    private NavsysAPI client = new NavsysAPIImpl(this);
     private ViewGroup rootView;
     private DestinationAdapter destinationsAdapter;
-    private List<Destination> destinationsList;
+    private List<Destination> destinationsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,13 @@ public class MainActivity extends AppCompatActivity {
                 String body = response.body().string();
                 Log.d(TAG, body);
                 destinationsList = ResponseParser.parseDestinationsResponse(body);
-                destinationsAdapter.notifyDataSetChanged();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        destinationsAdapter.setDestinationList(destinationsList);
+                        destinationsAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         };
         client.getDestinations(getDestinationsCallback);
