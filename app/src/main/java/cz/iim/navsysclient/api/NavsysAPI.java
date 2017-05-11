@@ -1,4 +1,4 @@
-package api;
+package cz.iim.navsysclient.api;
 
 import com.squareup.okhttp.Callback;
 

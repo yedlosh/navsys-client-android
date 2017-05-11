@@ -1,4 +1,4 @@
-package api;
+package cz.iim.navsysclient.api;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -8,10 +8,6 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
-
-/**
- * Created by yedlosh on 10/05/2017.
- */
 
 public class RequestCallback implements Callback {
 

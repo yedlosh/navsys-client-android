@@ -1,4 +1,4 @@
-package api;
+package cz.iim.navsysclient.api;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -12,7 +12,7 @@ import com.squareup.okhttp.RequestBody;
 
 import org.json.JSONObject;
 
-import cz.iim.navsysclient.Constants;
+import cz.iim.navsysclient.internal.Constants;
 
 public class NavsysAPIImpl implements NavsysAPI {
     private static final String TAG = NavsysAPIImpl.class.getSimpleName();

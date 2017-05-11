@@ -1,4 +1,4 @@
-package api;
+package cz.iim.navsysclient.api;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -7,8 +7,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.iim.navsysclient.Constants;
-import entities.Destination;
+import cz.iim.navsysclient.internal.Constants;
+import cz.iim.navsysclient.entities.Destination;
 
 
 public class ResponseParser {

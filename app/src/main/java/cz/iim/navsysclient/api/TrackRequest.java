@@ -1,12 +1,8 @@
-package api;
+package cz.iim.navsysclient.api;
 
 import java.util.List;
 
-import entities.AccessPoint;
-
-/**
- * Created by yedlosh on 10/05/2017.
- */
+import cz.iim.navsysclient.entities.AccessPoint;
 
 public class TrackRequest {
 

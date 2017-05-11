@@ -2,4 +2,9 @@
     <string name="app_name">Navsys Client</string>
     <string name="location_permission_rationale">Location access needed to get your indoor position</string>
     <string name="settings">Settings</string>
+    <string name="navigating_to">Navigating to destination:</string>
+    <string name="current_location">Current location:</string>
+    <string name="navigating">Navigating</string>
+    <string name="assigned_color">Assigned color:</string>
+    <string name="cancel_navigation">Cancel Navigation</string>
 </resources>

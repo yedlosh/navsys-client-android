@@ -1,4 +1,4 @@
-package cz.iim.navsysclient;
+package cz.iim.navsysclient.internal;
 
 import android.Manifest;
 import android.app.Activity;
@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.SnackbarOnDeniedPermissionListener;
+
+import cz.iim.navsysclient.R;
 
 public class Utils {
 

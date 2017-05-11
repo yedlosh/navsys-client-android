@@ -1,4 +1,4 @@
-package entities;
+package cz.iim.navsysclient.entities;
 
 /**
  * Created by yedlosh on 10/05/2017.

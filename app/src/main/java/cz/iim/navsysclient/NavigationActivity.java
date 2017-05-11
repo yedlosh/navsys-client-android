@@ -1,16 +1,18 @@
 package cz.iim.navsysclient;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.ViewGroup;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
 
-import static cz.iim.navsysclient.Utils.showLocationServicePromptIfNeeded;
+import cz.iim.navsysclient.entities.Destination;
+
+import static cz.iim.navsysclient.internal.Utils.showLocationServicePromptIfNeeded;
 
 
 public class NavigationActivity extends AppCompatActivity {
@@ -23,16 +25,30 @@ public class NavigationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_navigation);
 
         showLocationServicePromptIfNeeded(this);
+
+//        ActionBar actionBar = getActionBar();
+//        if (actionBar != null) {
+//            actionBar.setHomeButtonEnabled(false); // disable the button
+//            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+//            actionBar.setDisplayShowHomeEnabled(false); // remove the icon
+//        }
+        getSupportActionBar().setTitle("Navigation");
+
+        // Get the Intent that started this activity and extract the string
+        Intent intent = getIntent();
+        Destination destination = intent.getParcelableExtra(MainActivity.EXTRA_DESTINATION);
+
+        // Capture the layout's TextView and set the string as its text
+        TextView textView = (TextView) findViewById(R.id.destination_textView);
+        textView.setText(destination.getName());
     }
 
     private void pollTracker() {
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // TODO show rationale
             } else {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -52,12 +68,16 @@ public class NavigationActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        //TODO permission granted
+                    //TODO permission granted
                 } else {
                     // Permission Denied
                     finish();
                 }
             }
         }
+    }
+
+    public void cancelNavigation(View view) {
+        finish();
     }
 }
