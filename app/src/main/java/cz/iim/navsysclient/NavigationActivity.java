@@ -47,7 +47,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 87654;
 
-    private TrackingManager trackingManager;
+    private TrackingService trackingService;
     private Location destination;
 
     @Override
@@ -73,8 +73,8 @@ public class NavigationActivity extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.destination_textView);
         textView.setText(destination.getName());
 
-        trackingManager =  new TrackingManager();
-        registerReceiver(trackingManager,new IntentFilter(START_TRACKING_INTENT));
+        trackingService = new TrackingService(this);
+        //registerReceiver(trackingManager,new IntentFilter(START_TRACKING_INTENT));
 
         // Listener to the broadcast message from WifiIntent
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(locationReceiver,
@@ -168,11 +168,13 @@ public class NavigationActivity extends AppCompatActivity {
 
                             AssignedColorView colorView = (AssignedColorView) findViewById(R.id.assigned_color_view);
                             colorView.setAssignedColor(Color.parseColor(registerResponse.getAssignedColor()));
+                            trackingService.startTracking();
                         }
                     });
                     // Start tracking service
-                    Intent intent = new Intent(START_TRACKING_INTENT);
-                    sendBroadcast(intent);
+//                    Intent intent = new Intent(START_TRACKING_INTENT);
+//                    sendBroadcast(intent);
+
                 } else {
                     stopNavigation();
                 }
@@ -186,15 +188,17 @@ public class NavigationActivity extends AppCompatActivity {
 
     public void stopNavigation() {
 
-        Intent intent = new Intent(TrackingService.STOP_TRACKING_INTENT);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        //Intent intent = new Intent(TrackingService.STOP_TRACKING_INTENT);
+        //LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
         finish();
     }
 
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(trackingManager);
+        if(trackingService.isTracking()){
+            trackingService.stopTracking();
+        }
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(locationReceiver);
         super.onDestroy();
     }
