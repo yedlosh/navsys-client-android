@@ -20,7 +20,7 @@ import java.util.List;
 import cz.iim.navsysclient.api.NavsysAPI;
 import cz.iim.navsysclient.api.NavsysAPIImpl;
 import cz.iim.navsysclient.api.ResponseParser;
-import cz.iim.navsysclient.entities.Destination;
+import cz.iim.navsysclient.entities.Location;
 
 import static cz.iim.navsysclient.internal.Utils.requestRuntimePermissions;
 
@@ -29,10 +29,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final String EXTRA_DESTINATION = MainActivity.class.getSimpleName() + ".DESTINATION";
 
-    private NavsysAPI client = new NavsysAPIImpl(this);
+    private NavsysAPI client = NavsysAPIImpl.getInstance();
     private ViewGroup rootView;
-    private DestinationAdapter destinationsAdapter;
-    private List<Destination> destinationsList = new ArrayList<>();
+    private LocationAdapter destinationsAdapter;
+    private List<Location> destinationsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Setup Destinations ListView
         ListView destinationListView = (ListView) findViewById(R.id.destination_list_view);
-        destinationsAdapter = new DestinationAdapter(destinationsList, this);
+        destinationsAdapter = new LocationAdapter(destinationsList, this);
         destinationListView.setAdapter(destinationsAdapter);
         registerListViewClickListener(destinationListView);
 
@@ -59,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void startNavigation(Destination destination) {
+    private void startNavigation(Location location) {
         Intent intent = new Intent(this, NavigationActivity.class);
-        intent.putExtra(EXTRA_DESTINATION, destination);
+        intent.putExtra(EXTRA_DESTINATION, location);
         startActivity(intent);
     }
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        destinationsAdapter.setDestinationList(destinationsList);
+                        destinationsAdapter.setLocationList(destinationsList);
                         destinationsAdapter.notifyDataSetChanged();
                     }
                 });

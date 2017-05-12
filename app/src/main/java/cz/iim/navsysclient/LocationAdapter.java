@@ -9,36 +9,36 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import cz.iim.navsysclient.entities.Destination;
+import cz.iim.navsysclient.entities.Location;
 
-public class DestinationAdapter extends ArrayAdapter<Destination> {
-    private static final String TAG = DestinationAdapter.class.getSimpleName();
+public class LocationAdapter extends ArrayAdapter<Location> {
+    private static final String TAG = LocationAdapter.class.getSimpleName();
 
-    private List<Destination> destinationList;
+    private List<Location> locationList;
     private Context context;
 
-    public DestinationAdapter(List<Destination> destinationList, Context ctx) {
-        super(ctx, android.R.layout.simple_list_item_1, destinationList);
-        this.destinationList = destinationList;
+    public LocationAdapter(List<Location> locationList, Context ctx) {
+        super(ctx, android.R.layout.simple_list_item_1, locationList);
+        this.locationList = locationList;
         this.context = ctx;
     }
 
     public int getCount() {
-        return destinationList.size();
+        return locationList.size();
     }
 
-    public Destination getItem(int position) {
-        return destinationList.get(position);
+    public Location getItem(int position) {
+        return locationList.get(position);
     }
 
     public long getItemId(int position) {
-        return destinationList.get(position).hashCode();
+        return locationList.get(position).hashCode();
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
 
-        DestinationHolder holder = new DestinationHolder();
+        LocationHolder holder = new LocationHolder();
 
         // First let's verify the convertView is not null
         if (convertView == null) {
@@ -50,21 +50,21 @@ public class DestinationAdapter extends ArrayAdapter<Destination> {
             //TextView distView = (TextView) v.findViewById(R.id.dist);
 
 
-            holder.destinationNameView = tv;
+            holder.locationNameView = tv;
             //holder.distView = distView;
 
             view.setTag(holder);
         } else
-            holder = (DestinationHolder) view.getTag();
+            holder = (LocationHolder) view.getTag();
 
-        Destination destination = destinationList.get(position);
-        holder.destinationNameView.setText(destination.getName());
-        //holder.destinationNameView.setText("" + p.getDistance());
+        Location location = locationList.get(position);
+        holder.locationNameView.setText(location.getName());
+        //holder.locationNameView.setText("" + p.getDistance());
         return view;
     }
 
-    public void setDestinationList(List<Destination> destinationList) {
-        this.destinationList = destinationList;
+    public void setLocationList(List<Location> locationList) {
+        this.locationList = locationList;
     }
 
     /* *********************************
@@ -72,8 +72,8 @@ public class DestinationAdapter extends ArrayAdapter<Destination> {
 	 * It makes the view faster and avoid finding the component
 	 * **********************************/
 
-    private static class DestinationHolder {
-        public TextView destinationNameView;
+    private static class LocationHolder {
+        public TextView locationNameView;
         //public TextView distView;
     }
 }

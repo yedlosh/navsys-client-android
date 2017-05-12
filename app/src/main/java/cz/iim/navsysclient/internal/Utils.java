@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.view.ViewGroup;
@@ -13,6 +15,8 @@ import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.SnackbarOnDeniedPermissionListener;
+
+import java.util.List;
 
 import cz.iim.navsysclient.R;
 
@@ -63,5 +67,10 @@ public class Utils {
             });
             dialog.show();
         }
+    }
+
+    public static List<ScanResult> getLatestWifiScanResults(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.getScanResults();
     }
 }

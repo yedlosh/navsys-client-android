@@ -28,6 +28,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".NavigationActivity"></activity>
+        <service android:name=".wifi.TrackingService" />
     </application>
-
 </manifest>

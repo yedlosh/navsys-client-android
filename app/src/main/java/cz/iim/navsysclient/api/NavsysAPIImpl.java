@@ -18,15 +18,24 @@ public class NavsysAPIImpl implements NavsysAPI {
     private static final String TAG = NavsysAPIImpl.class.getSimpleName();
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
-    private final Context context;
+    private static NavsysAPIImpl instance = null;
+
     private final OkHttpClient httpClient;
 
     private enum METHOD { POST, GET, PUT, DELETE };
 
     // Constructor
-    public NavsysAPIImpl(Context context) {
-        this.context = context;
+    private NavsysAPIImpl() {
         this.httpClient = new OkHttpClient();
+    }
+
+    public static NavsysAPIImpl getInstance() {
+        if(instance == null) {
+            synchronized(NavsysAPIImpl.class) {
+                instance = new NavsysAPIImpl();
+            }
+        }
+        return instance;
     }
 
     @Override

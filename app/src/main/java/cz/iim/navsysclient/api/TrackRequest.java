@@ -16,12 +16,12 @@ public class TrackRequest {
     public final Long time;
     public final List<AccessPoint> wifiFingerprint;
 
-    @Override
-    public String toString() {
-        return "TrackRequest{" +
-                "username='" + username + '\'' +
-                ", time=" + time +
-                ", wifiFingerprint=" + wifiFingerprint +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "TrackRequest{" +
+//                "username='" + username + '\'' +
+//                ", time=" + time +
+//                ", wifiFingerprint=" + wifiFingerprint +
+//                '}';
+//    }
 }

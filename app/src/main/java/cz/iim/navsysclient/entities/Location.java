@@ -3,11 +3,11 @@ package cz.iim.navsysclient.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Destination implements Parcelable {
+public class Location implements Parcelable {
     private final String id;
     private final String name;
 
-    public Destination(String id, String name) {
+    public Location(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -21,20 +21,20 @@ public class Destination implements Parcelable {
     }
 
     // Parcelable implementation
-    private Destination(Parcel in) {
+    private Location(Parcel in) {
         id = in.readString();
         name = in.readString();
     }
 
-    public static final Creator<Destination> CREATOR = new Creator<Destination>() {
+    public static final Creator<Location> CREATOR = new Creator<Location>() {
         @Override
-        public Destination createFromParcel(Parcel in) {
-            return new Destination(in);
+        public Location createFromParcel(Parcel in) {
+            return new Location(in);
         }
 
         @Override
-        public Destination[] newArray(int size) {
-            return new Destination[size];
+        public Location[] newArray(int size) {
+            return new Location[size];
         }
     };
 

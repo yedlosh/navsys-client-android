@@ -82,6 +82,7 @@
         android:layout_marginEnd="9dp" />
 
     <cz.iim.navsysclient.views.AssignedColorView
+        android:id="@+id/assigned_color_view"
         android:layout_width="135dp"
         android:layout_height="20dp"
         android:layout_marginLeft="17dp"
