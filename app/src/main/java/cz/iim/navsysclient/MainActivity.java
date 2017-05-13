@@ -1,10 +1,12 @@
 package cz.iim.navsysclient;
 
 import android.content.Intent;
-import android.support.constraint.ConstraintLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewGroup rootView;
     private LocationAdapter destinationsAdapter;
     private List<Location> destinationsList = new ArrayList<>();
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle permissions
         requestRuntimePermissions(this, rootView);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
+                        // Populate Destinations ListView
+                        client.getDestinations(getDestinationsCallback());
+                    }
+                }
+        );
+
+        // Show list as refreshing upon startup
+        swipeRefreshLayout.setRefreshing(true);
 
         // Setup Destinations ListView
         ListView destinationListView = (ListView) findViewById(R.id.destination_list_view);
@@ -60,6 +79,34 @@ public class MainActivity extends AppCompatActivity {
         destinationListView.setEmptyView(emptyTextView);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+/*
+ * Listen for option item selections so that we receive a notification
+ * when the user requests a refresh by selecting the refresh action bar item.
+ */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Check if user triggered a refresh:
+            case R.id.menu_refresh:
+                Log.i(TAG, "Refresh menu item selected");
+
+                // Signal SwipeRefreshLayout to start the progress indicator
+                swipeRefreshLayout.setRefreshing(true);
+                client.getDestinations(getDestinationsCallback());
+
+                return true;
+        }
+
+        // User didn't trigger a refresh, let the superclass handle this action
+        return super.onOptionsItemSelected(item);
+
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -86,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Request request, IOException e) {
                 Log.e(TAG, "Failed request: " + request, e);
-                // TODO Show could not load destinations,
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -99,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         destinationsAdapter.setLocationList(destinationsList);
                         destinationsAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
