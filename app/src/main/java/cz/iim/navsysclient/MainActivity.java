@@ -2,6 +2,7 @@ package cz.iim.navsysclient;
 
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -49,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
         // Handle permissions
         requestRuntimePermissions(this, rootView);
 
+        // Set ActionBar title
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null) {
+            actionBar.setTitle(R.string.title_pick_a_destination);
+        }
+
+        // Setup SwipeRefreshLayout which is wrapped around the destinationsList ListView
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -56,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onRefresh() {
                         Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
 
-                        // Populate Destinations ListView
                         client.getDestinations(getDestinationsCallback());
                     }
                 }
@@ -71,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
         destinationListView.setAdapter(destinationsAdapter);
         registerListViewClickListener(destinationListView);
 
-        // Populate Destinations ListView
-        client.getDestinations(getDestinationsCallback());
-
-        // Set empty view
+        // Set empty view for Destinations ListView
         TextView emptyTextView = (TextView) findViewById(R.id.empty_list_item);
         destinationListView.setEmptyView(emptyTextView);
+
+        // Populate Destinations ListView
+        client.getDestinations(getDestinationsCallback());
     }
 
     @Override
@@ -107,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
 
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
