@@ -7,4 +7,5 @@
     <string name="navigating">Navigating</string>
     <string name="assigned_color">Assigned color:</string>
     <string name="cancel_navigation">Cancel Navigation</string>
+    <string name="no_destinations">Could not fetch any destinations</string>
 </resources>

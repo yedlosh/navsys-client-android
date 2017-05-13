@@ -35,8 +35,7 @@ import cz.iim.navsysclient.api.ResponseParser;
 import cz.iim.navsysclient.entities.Location;
 import cz.iim.navsysclient.internal.Utils;
 import cz.iim.navsysclient.views.AssignedColorView;
-import cz.iim.navsysclient.wifi.TrackingManager;
-import cz.iim.navsysclient.wifi.TrackingService;
+import cz.iim.navsysclient.services.TrackingService;
 
 import static cz.iim.navsysclient.internal.Utils.showLocationServicePromptIfNeeded;
 
@@ -118,16 +117,11 @@ public class NavigationActivity extends AppCompatActivity {
     };
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_PERMISSIONS: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //TODO permission granted
-                } else {
-                    // Permission Denied
+                if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     finish();
                 }
             }
@@ -149,7 +143,7 @@ public class NavigationActivity extends AppCompatActivity {
         return new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Log.e(TAG, "Failed request: " + request, e);
+                Log.e(TAG, "Navsys API: Failed register request: " + request, e);
                 stopNavigation();
             }
 
@@ -183,6 +177,11 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     public void cancelNavigation(View view) {
+        NavsysAPI client = NavsysAPIImpl.getInstance();
+
+        JSONObject request = RequestParser.parseCancelRequest(InstanceID.getInstance(this).getId(), System.currentTimeMillis()/1000);
+        client.cancel(getCancelCallback(), request);
+
         stopNavigation();
     }
 
@@ -193,6 +192,20 @@ public class NavigationActivity extends AppCompatActivity {
         finish();
     }
 
+    private Callback getCancelCallback() {
+        return new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.e(TAG, "Navsys API: Failed cancel request" + request, e);
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                String body = response.body().string();
+                Log.d(TAG, "Navsys API: Navigation Cancelled");
+            }
+        };
+    }
 
     @Override
     public void onDestroy() {

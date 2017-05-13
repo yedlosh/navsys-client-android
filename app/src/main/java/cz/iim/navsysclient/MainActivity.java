@@ -1,6 +1,7 @@
 package cz.iim.navsysclient;
 
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Populate Destinations ListView
         client.getDestinations(getDestinationsCallback());
+
+        // Set empty view
+        TextView emptyTextView = (TextView) findViewById(R.id.empty_list_item);
+        destinationListView.setEmptyView(emptyTextView);
     }
 
     @Override
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Request request, IOException e) {
                 Log.e(TAG, "Failed request: " + request, e);
+                // TODO Show could not load destinations,
             }
 
             @Override

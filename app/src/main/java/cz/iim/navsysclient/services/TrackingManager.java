@@ -1,4 +1,4 @@
-package cz.iim.navsysclient.wifi;
+package cz.iim.navsysclient.services;
 
 import android.content.Context;
 import android.content.Intent;
