@@ -1,6 +1,5 @@
-package cz.iim.navsysclient.wifi;
+package cz.iim.navsysclient.services;
 
-import android.app.IntentService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -29,37 +29,28 @@ import cz.iim.navsysclient.entities.Location;
 import cz.iim.navsysclient.internal.Constants;
 
 
-public class TrackingService extends IntentService {
+public class TrackingService {
     private static final String TAG = TrackingService.class.getSimpleName();
+    private static final String WAKE_LOCK_TAG = TAG + ".WAKE_LOCK_TAG";
     public static final String TRACKING_LOCATION_BROADCAST = TAG + ".LOCATION_BROADCAST";
     public static final String TRACKING_LOCATION_EXTRA = TAG + ".LOCATION_EXTRA";
-    public static final String STOP_TRACKING_INTENT = TAG + ".STOP_TRACKING";
 
-    private Intent wakefulIntent;
-
+    private Context context;
+    private PowerManager.WakeLock wakeLock;
     private WifiScanCompleteReceiver scanReceiver;
     private WifiManager wifiManager;
 
     private Handler handler;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     */
-    public TrackingService() {
-        super(TAG);
+    private boolean isTracking = false;
+
+
+    public TrackingService(Context context) {
+        this.context = context;
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        boolean startTracking = intent.getBooleanExtra(TrackingManager.TRACKING_START_EXTRA, false);
-        // IF start setup WiFiScanComplete receiver and start running timer to startScans
-        Log.d(TAG, "Start tracking:" + startTracking);
-        if(startTracking){
-            wakefulIntent = intent;
-            startTracking();
-        } else {
-            TrackingManager.completeWakefulIntent(intent);
-        }
+    public boolean isTracking() {
+        return isTracking;
     }
 
     private Runnable runTracking = new Runnable() {
@@ -73,41 +64,35 @@ public class TrackingService extends IntentService {
         }
     };
 
-    private void startTracking() {
-        //Make sure WiFi is running
-        wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        wifiManager.setWifiEnabled(true);
+    public void startTracking() {
+        Log.d(TAG, "Starting tracking, acquiring wake lock");
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
+        wakeLock.acquire();
 
+        //Make sure WiFi is running
+        wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
+        //Looper.prepare();
         handler = new Handler();
 
         IntentFilter intentFilter = new IntentFilter( );
         intentFilter.addAction( WifiManager.SCAN_RESULTS_AVAILABLE_ACTION );
         scanReceiver =  new WifiScanCompleteReceiver();
-        getApplicationContext().registerReceiver(scanReceiver,intentFilter);
-
-        LocalBroadcastManager.getInstance(getApplicationContext())
-                .registerReceiver(stopTrackingReceiver, new IntentFilter(STOP_TRACKING_INTENT));
+        context.getApplicationContext().registerReceiver(scanReceiver,intentFilter);
 
         //Start polling scan
         handler.post(runTracking);
+        isTracking = true;
     }
 
-    private void stopTracking() {
+    public void stopTracking() {
         Log.d(TAG, "Stopping tracking, releasing wake lock");
         handler.removeCallbacks(runTracking);
-        getApplicationContext().unregisterReceiver(scanReceiver);
-        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(stopTrackingReceiver);
-
-        TrackingManager.completeWakefulIntent(wakefulIntent);
+        context.getApplicationContext().unregisterReceiver(scanReceiver);
+        isTracking = false;
+        wakeLock.release();
     }
-
-    // Getting the CurrentLocation from the received braodcast
-    private BroadcastReceiver stopTrackingReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            stopTracking();
-        }
-    };
 
     private class WifiScanCompleteReceiver extends BroadcastReceiver {
 
@@ -141,7 +126,7 @@ public class TrackingService extends IntentService {
                     if(location != null) {
                         Intent intent = new Intent(TRACKING_LOCATION_BROADCAST);
                         intent.putExtra(TRACKING_LOCATION_EXTRA, location);
-                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                        LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(intent);
                     }
                 }
             };

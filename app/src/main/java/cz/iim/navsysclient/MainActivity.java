@@ -1,13 +1,18 @@
 package cz.iim.navsysclient;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -33,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewGroup rootView;
     private LocationAdapter destinationsAdapter;
     private List<Location> destinationsList = new ArrayList<>();
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +50,69 @@ public class MainActivity extends AppCompatActivity {
         // Handle permissions
         requestRuntimePermissions(this, rootView);
 
+        // Set ActionBar title
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null) {
+            actionBar.setTitle(R.string.title_pick_a_destination);
+        }
+
+        // Setup SwipeRefreshLayout which is wrapped around the destinationsList ListView
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
+                        client.getDestinations(getDestinationsCallback());
+                    }
+                }
+        );
+
+        // Show list as refreshing upon startup
+        swipeRefreshLayout.setRefreshing(true);
+
         // Setup Destinations ListView
         ListView destinationListView = (ListView) findViewById(R.id.destination_list_view);
         destinationsAdapter = new LocationAdapter(destinationsList, this);
         destinationListView.setAdapter(destinationsAdapter);
         registerListViewClickListener(destinationListView);
 
+        // Set empty view for Destinations ListView
+        TextView emptyTextView = (TextView) findViewById(R.id.empty_list_item);
+        destinationListView.setEmptyView(emptyTextView);
+
         // Populate Destinations ListView
         client.getDestinations(getDestinationsCallback());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+/*
+ * Listen for option item selections so that we receive a notification
+ * when the user requests a refresh by selecting the refresh action bar item.
+ */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Check if user triggered a refresh:
+            case R.id.menu_refresh:
+                Log.i(TAG, "Refresh menu item selected");
+
+                // Signal SwipeRefreshLayout to start the progress indicator
+                swipeRefreshLayout.setRefreshing(true);
+                client.getDestinations(getDestinationsCallback());
+
+                return true;
+        }
+
+        // User didn't trigger a refresh, let the superclass handle this action
+        return super.onOptionsItemSelected(item);
+
     }
 
     @Override
@@ -80,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Request request, IOException e) {
                 Log.e(TAG, "Failed request: " + request, e);
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -92,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         destinationsAdapter.setLocationList(destinationsList);
                         destinationsAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }

@@ -58,4 +58,18 @@ public class RequestParser {
             return null;
         }
     }
+
+    public static JSONObject parseCancelRequest(String username, Long time) {
+        try {
+            JSONObject trackRequest = new JSONObject();
+
+            trackRequest.put("username", username);
+            trackRequest.put("time", time);
+
+            return trackRequest;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

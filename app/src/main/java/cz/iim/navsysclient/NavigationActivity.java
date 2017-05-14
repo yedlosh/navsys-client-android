@@ -11,6 +11,7 @@ import android.net.wifi.ScanResult;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,8 +36,7 @@ import cz.iim.navsysclient.api.ResponseParser;
 import cz.iim.navsysclient.entities.Location;
 import cz.iim.navsysclient.internal.Utils;
 import cz.iim.navsysclient.views.AssignedColorView;
-import cz.iim.navsysclient.wifi.TrackingManager;
-import cz.iim.navsysclient.wifi.TrackingService;
+import cz.iim.navsysclient.services.TrackingService;
 
 import static cz.iim.navsysclient.internal.Utils.showLocationServicePromptIfNeeded;
 
@@ -47,8 +47,10 @@ public class NavigationActivity extends AppCompatActivity {
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 87654;
 
-    private TrackingManager trackingManager;
+    private TrackingService trackingService;
     private Location destination;
+
+    private TextView statusTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,18 +65,27 @@ public class NavigationActivity extends AppCompatActivity {
 //            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
 //            actionBar.setDisplayShowHomeEnabled(false); // remove the icon
 //        }
-        getSupportActionBar().setTitle("Navigation");
+
+        // Set ActionBar title
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null) {
+            actionBar.setTitle(R.string.title_navigation);
+        }
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
         destination = intent.getParcelableExtra(MainActivity.EXTRA_DESTINATION);
 
-        // Capture the layout's TextView and set the string as its text
-        TextView textView = (TextView) findViewById(R.id.destination_textView);
-        textView.setText(destination.getName());
+        // Set status text to Initializing
+        statusTextView = (TextView) findViewById(R.id.status_textView);
+        statusTextView.setText(R.string.initializing);
 
-        trackingManager =  new TrackingManager();
-        registerReceiver(trackingManager,new IntentFilter(START_TRACKING_INTENT));
+        // Capture the layout's Destination TextView and set destination name as its text
+        TextView destinationTextView = (TextView) findViewById(R.id.destination_textView);
+        destinationTextView.setText(destination.getName());
+
+        trackingService = new TrackingService(this);
+        //registerReceiver(trackingManager,new IntentFilter(START_TRACKING_INTENT));
 
         // Listener to the broadcast message from WifiIntent
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(locationReceiver,
@@ -83,7 +94,7 @@ public class NavigationActivity extends AppCompatActivity {
         startNavigation();
     }
 
-    private void pollTracker() {
+    private void checkPermissions() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -118,16 +129,11 @@ public class NavigationActivity extends AppCompatActivity {
     };
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_PERMISSIONS: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //TODO permission granted
-                } else {
-                    // Permission Denied
+                if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     finish();
                 }
             }
@@ -149,7 +155,7 @@ public class NavigationActivity extends AppCompatActivity {
         return new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Log.e(TAG, "Failed request: " + request, e);
+                Log.e(TAG, "Navsys API: Failed register request: " + request, e);
                 stopNavigation();
             }
 
@@ -163,16 +169,16 @@ public class NavigationActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            statusTextView.setText(R.string.navigating);
+
                             TextView textView = (TextView) findViewById(R.id.location_textView);
                             textView.setText(registerResponse.getLocation().getName());
 
                             AssignedColorView colorView = (AssignedColorView) findViewById(R.id.assigned_color_view);
                             colorView.setAssignedColor(Color.parseColor(registerResponse.getAssignedColor()));
+                            trackingService.startTracking();
                         }
                     });
-                    // Start tracking service
-                    Intent intent = new Intent(START_TRACKING_INTENT);
-                    sendBroadcast(intent);
                 } else {
                     stopNavigation();
                 }
@@ -181,20 +187,41 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     public void cancelNavigation(View view) {
+        NavsysAPI client = NavsysAPIImpl.getInstance();
+
+        JSONObject request = RequestParser.parseCancelRequest(InstanceID.getInstance(this).getId(), System.currentTimeMillis()/1000);
+        client.cancel(getCancelCallback(), request);
+
         stopNavigation();
     }
 
     public void stopNavigation() {
 
-        Intent intent = new Intent(TrackingService.STOP_TRACKING_INTENT);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        //Intent intent = new Intent(TrackingService.STOP_TRACKING_INTENT);
+        //LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
         finish();
     }
 
+    private Callback getCancelCallback() {
+        return new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.e(TAG, "Navsys API: Failed cancel request" + request, e);
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                String body = response.body().string();
+                Log.d(TAG, "Navsys API: Navigation Cancelled");
+            }
+        };
+    }
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(trackingManager);
+        if(trackingService.isTracking()){
+            trackingService.stopTracking();
+        }
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(locationReceiver);
         super.onDestroy();
     }
