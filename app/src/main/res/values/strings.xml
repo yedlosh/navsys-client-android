@@ -14,6 +14,7 @@
     <string name="navigating_to">Navigating to location:</string>
     <string name="current_location">Current location:</string>
     <string name="navigating">Navigating</string>
+    <string name="initializing">Initializing...</string>
     <string name="assigned_color">Assigned color:</string>
     <string name="cancel_navigation">Cancel Navigation</string>
 </resources>

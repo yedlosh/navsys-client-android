@@ -50,6 +50,8 @@ public class NavigationActivity extends AppCompatActivity {
     private TrackingService trackingService;
     private Location destination;
 
+    private TextView statusTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,9 +76,13 @@ public class NavigationActivity extends AppCompatActivity {
         Intent intent = getIntent();
         destination = intent.getParcelableExtra(MainActivity.EXTRA_DESTINATION);
 
-        // Capture the layout's TextView and set the string as its text
-        TextView textView = (TextView) findViewById(R.id.destination_textView);
-        textView.setText(destination.getName());
+        // Set status text to Initializing
+        statusTextView = (TextView) findViewById(R.id.status_textView);
+        statusTextView.setText(R.string.initializing);
+
+        // Capture the layout's Destination TextView and set destination name as its text
+        TextView destinationTextView = (TextView) findViewById(R.id.destination_textView);
+        destinationTextView.setText(destination.getName());
 
         trackingService = new TrackingService(this);
         //registerReceiver(trackingManager,new IntentFilter(START_TRACKING_INTENT));
@@ -88,7 +94,7 @@ public class NavigationActivity extends AppCompatActivity {
         startNavigation();
     }
 
-    private void pollTracker() {
+    private void checkPermissions() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -163,6 +169,8 @@ public class NavigationActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            statusTextView.setText(R.string.navigating);
+
                             TextView textView = (TextView) findViewById(R.id.location_textView);
                             textView.setText(registerResponse.getLocation().getName());
 
@@ -171,10 +179,6 @@ public class NavigationActivity extends AppCompatActivity {
                             trackingService.startTracking();
                         }
                     });
-                    // Start tracking service
-//                    Intent intent = new Intent(START_TRACKING_INTENT);
-//                    sendBroadcast(intent);
-
                 } else {
                     stopNavigation();
                 }
