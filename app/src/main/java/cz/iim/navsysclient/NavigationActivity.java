@@ -49,6 +49,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private TrackingService trackingService;
     private Location destination;
+    private boolean reachedDestination = false;
 
     private TextView statusTextView;
 
@@ -187,12 +188,15 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     public void cancelNavigation(View view) {
+        cancelNavigation();
+        stopNavigation();
+    }
+
+    public void cancelNavigation() {
         NavsysAPI client = NavsysAPIImpl.getInstance();
 
         JSONObject request = RequestParser.parseCancelRequest(InstanceID.getInstance(this).getId(), System.currentTimeMillis()/1000);
         client.cancel(getCancelCallback(), request);
-
-        stopNavigation();
     }
 
     public void stopNavigation() {
@@ -221,6 +225,9 @@ public class NavigationActivity extends AppCompatActivity {
     public void onDestroy() {
         if(trackingService.isTracking()){
             trackingService.stopTracking();
+        }
+        if(!reachedDestination) {
+            cancelNavigation();
         }
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(locationReceiver);
         super.onDestroy();
