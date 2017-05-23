@@ -1,6 +1,8 @@
 package cz.iim.navsysclient;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -82,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
         TextView emptyTextView = (TextView) findViewById(R.id.empty_list_item);
         destinationListView.setEmptyView(emptyTextView);
 
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
+        wifiManager.startScan();
+
         // Populate Destinations ListView
         client.getDestinations(getDestinationsCallback());
     }
@@ -152,8 +158,10 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        destinationsAdapter.setLocationList(destinationsList);
-                        destinationsAdapter.notifyDataSetChanged();
+                        if(destinationsList != null) {
+                            destinationsAdapter.setLocationList(destinationsList);
+                            destinationsAdapter.notifyDataSetChanged();
+                        }
                         swipeRefreshLayout.setRefreshing(false);
                     }
                 });

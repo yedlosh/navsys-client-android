@@ -20,16 +20,22 @@ public class ResponseParser {
         List<Location> locations = new ArrayList<>();
 
         try {
-            JSONArray jsonArray = new JSONArray(responseBody);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject destinationJSON = jsonArray.getJSONObject(i);
-                String id = destinationJSON.getString(Constants.NAVSYS_LOCATION_ID_KEY);
-                String name = destinationJSON.getString(Constants.NAVSYS_LOCATION_ID_NAME);
+            JSONObject json = new JSONObject(responseBody);
+            boolean success = json.getBoolean("success");
 
-                locations.add(new Location(id, name));
+            if(success) {
+                JSONArray jsonArray = json.getJSONArray("payload");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject destinationJSON = jsonArray.getJSONObject(i);
+                    String id = destinationJSON.getString(Constants.NAVSYS_LOCATION_ID_KEY);
+                    String name = destinationJSON.getString(Constants.NAVSYS_LOCATION_ID_NAME);
+
+                    locations.add(new Location(id, name));
+                }
+                return locations;
+            } else {
+                return null;
             }
-            return locations;
-
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -39,11 +45,15 @@ public class ResponseParser {
     public static Location parseTrackResponse(String responseBody) {
         try {
             JSONObject json = new JSONObject(responseBody);
-            String id = json.getString("location");
-            String name = json.getString("name");
+            boolean success = json.getBoolean("success");
+            if(success) {
+                String id = json.getString("location");
+                String name = json.getString("name");
 
-            return new Location(id, name);
-
+                return new Location(id, name);
+            } else {
+                return null;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -53,10 +63,15 @@ public class ResponseParser {
     public static RegisterResponse parseRegisterResponse(String responseBody) {
         try {
             JSONObject json = new JSONObject(responseBody);
-            String locationId = json.getString("location");
-            String name = json.getString("name");
-            String color = json.getString("color");
-            return new RegisterResponse(new Location(locationId, name), color);
+            boolean success = json.getBoolean("success");
+            if(success) {
+                String locationId = json.getString("location");
+                String name = json.getString("name");
+                String color = json.getString("color");
+                return new RegisterResponse(new Location(locationId, name), color);
+            } else {
+                return null;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
