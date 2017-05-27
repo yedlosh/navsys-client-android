@@ -147,7 +147,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Request request, IOException e) {
                 Log.e(TAG, "Failed request: " + request, e);
-                swipeRefreshLayout.setRefreshing(false);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(swipeRefreshLayout.isRefreshing()) {
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    }
+                });
             }
 
             @Override
@@ -162,7 +169,9 @@ public class MainActivity extends AppCompatActivity {
                             destinationsAdapter.setLocationList(destinationsList);
                             destinationsAdapter.notifyDataSetChanged();
                         }
-                        swipeRefreshLayout.setRefreshing(false);
+                        if(swipeRefreshLayout.isRefreshing()) {
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
                     }
                 });
             }
