@@ -42,15 +42,16 @@ public class ResponseParser {
         }
     }
 
-    public static Location parseTrackResponse(String responseBody) {
+    public static TrackResponse parseTrackResponse(String responseBody) {
         try {
             JSONObject json = new JSONObject(responseBody);
             boolean success = json.getBoolean("success");
             if(success) {
                 String id = json.getString("location");
                 String name = json.getString("name");
+                boolean finished = json.getBoolean("finished");
 
-                return new Location(id, name);
+                return new TrackResponse(new Location(id, name), finished);
             } else {
                 return null;
             }

@@ -10,6 +10,8 @@
     <string name="menu_refresh">Refresh list</string>
 
     <!-- Navigation Activity -->
+    <string name="close">Close</string>
+    <string name="finished">Finished</string>
     <string name="title_navigation">Navigation</string>
     <string name="navigating_to">Navigating to location:</string>
     <string name="current_location">Current location:</string>

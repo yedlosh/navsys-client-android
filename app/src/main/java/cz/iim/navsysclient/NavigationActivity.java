@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.iid.InstanceID;
@@ -113,11 +114,12 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
 
-    // Getting the CurrentLocation from the received braodcast
+    // Getting the CurrentLocation from the received broadcast
     private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Location newLocation = intent.getParcelableExtra(TrackingService.TRACKING_LOCATION_EXTRA);
+            boolean finished = intent.getBooleanExtra(TrackingService.TRACKING_FINISHED_EXTRA, false);
             if(newLocation != null) {
                 Log.d(TAG, "Got Location from TrackingService: " + newLocation.getName());
                 // Capture the layout's TextView and set the string as its text
@@ -125,6 +127,13 @@ public class NavigationActivity extends AppCompatActivity {
                 textView.setText(newLocation.getName());
             } else {
                 Log.w(TAG, "Got location intent without Location!");
+            }
+            if(finished) {
+                reachedDestination = true;
+                stopNavigation();
+                statusTextView.setText(R.string.finished);
+                Button cancelButton = (Button) findViewById(R.id.cancel_navigation_button);
+                cancelButton.setText(R.string.close);
             }
         }
     };
@@ -188,8 +197,11 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     public void cancelNavigation(View view) {
-        cancelNavigation();
         stopNavigation();
+        if(reachedDestination) {
+            cancelNavigation();
+        }
+        finish();
     }
 
     public void cancelNavigation() {
@@ -203,7 +215,10 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Intent intent = new Intent(TrackingService.STOP_TRACKING_INTENT);
         //LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-        finish();
+
+        if(trackingService.isTracking()){
+            trackingService.stopTracking();
+        }
     }
 
     private Callback getCancelCallback() {
@@ -223,9 +238,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if(trackingService.isTracking()){
-            trackingService.stopTracking();
-        }
+        stopNavigation();
         if(!reachedDestination) {
             cancelNavigation();
         }

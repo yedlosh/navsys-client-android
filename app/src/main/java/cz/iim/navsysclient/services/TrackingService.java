@@ -25,6 +25,7 @@ import cz.iim.navsysclient.api.NavsysAPI;
 import cz.iim.navsysclient.api.NavsysAPIImpl;
 import cz.iim.navsysclient.api.RequestParser;
 import cz.iim.navsysclient.api.ResponseParser;
+import cz.iim.navsysclient.api.TrackResponse;
 import cz.iim.navsysclient.entities.Location;
 import cz.iim.navsysclient.internal.Constants;
 
@@ -34,6 +35,7 @@ public class TrackingService {
     private static final String WAKE_LOCK_TAG = TAG + ".WAKE_LOCK_TAG";
     public static final String TRACKING_LOCATION_BROADCAST = TAG + ".LOCATION_BROADCAST";
     public static final String TRACKING_LOCATION_EXTRA = TAG + ".LOCATION_EXTRA";
+    public static final String TRACKING_FINISHED_EXTRA = TAG + ".FINISHED_EXTRA";
 
     private Context context;
     private PowerManager.WakeLock wakeLock;
@@ -120,12 +122,13 @@ public class TrackingService {
                 public void onResponse(Response response) throws IOException {
                     String body = response.body().string();
                     Log.d(TAG, "Got track response: " + body);
-                    Location location = ResponseParser.parseTrackResponse(body);
+                    TrackResponse trackResponse = ResponseParser.parseTrackResponse(body);
 
                     // TODO sent via local intent to NavActivity
-                    if(location != null) {
+                    if(trackResponse != null) {
                         Intent intent = new Intent(TRACKING_LOCATION_BROADCAST);
-                        intent.putExtra(TRACKING_LOCATION_EXTRA, location);
+                        intent.putExtra(TRACKING_LOCATION_EXTRA, trackResponse.getLocation());
+                        intent.putExtra(TRACKING_FINISHED_EXTRA, trackResponse.getFinished());
                         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(intent);
                     }
                 }

@@ -6,7 +6,7 @@ public class Constants {
     }
 
     public static final int TRACKING_INTERVAL = 5000;
-    public static final String NAVSYS_API_ADDR = "http://172.17.17.148:3001";
+    public static final String NAVSYS_API_ADDR = "http://192.168.1.100:3001";
 
     public static final String NAVSYS_API_TRACK = "/track";
     public static final String NAVSYS_API_REGISTER = "/register";
