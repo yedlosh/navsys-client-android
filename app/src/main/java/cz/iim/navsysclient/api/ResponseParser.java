@@ -49,7 +49,10 @@ public class ResponseParser {
             if(success) {
                 String id = json.getString("location");
                 String name = json.getString("name");
-                boolean finished = json.getBoolean("finished");
+                boolean finished = false;
+                if(json.has("finished")){
+                    finished = json.getBoolean("finished");
+                }
 
                 return new TrackResponse(new Location(id, name), finished);
             } else {
